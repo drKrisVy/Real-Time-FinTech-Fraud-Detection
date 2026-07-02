@@ -39,17 +39,6 @@ fintech-fraud-detection/
 └── README.md
 ```
 
-## Getting Started
-
-```bash
-git clone https://github.com/YOUR_USERNAME/fintech-fraud-detection.git
-cd fintech-fraud-detection
-pip install -r requirements.txt
-jupyter notebook notebooks/fraud_detection.ipynb
-```
-
-The notebook downloads the PaySim dataset automatically via `kagglehub` — no manual download needed. Module 6 requires a local Redis server (installed automatically in the notebook on Debian/Ubuntu-based environments, e.g. Colab).
-
 ## Dataset
 
 [PaySim1](https://www.kaggle.com/datasets/ealaxi/paysim1) — a synthetic dataset simulating mobile money transactions, generated from real financial transaction logs, with injected fraudulent behavior.
