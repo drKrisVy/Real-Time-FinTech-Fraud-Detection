@@ -6,18 +6,25 @@ A fraud detection pipeline built on the [PaySim](https://www.kaggle.com/datasets
 
 | Metric | Score |
 |---|---|
-| PR-AUC (out-of-time test set) | **0.9829** |
-| Recall (fraud class) | **100%** |
-| Precision (fraud class) | **92%** |
+| PR-AUC (out-of-time test set) | **0.9868** |
+| Precision (fraud class) | **95%** |
+| Recall (fraud class) | **99%** |
+| F1 (fraud class) | **0.97** |
+| Optimal decision threshold | 0.982 |
 | Test set size | 552,504 transactions |
-| Median inference latency | **~20ms** per transaction |
+| Measured inference latency | **~0.5ms avg / ~0.8ms P95** (model only), ~2-4ms end-to-end via Redis |
+
+Training is fully deterministic (`n_jobs=1`, `deterministic=True` on LightGBM), so these results reproduce exactly on every run.
 
 ## Overview
 
-- **EDA & Feature Engineering** — Filtered 6.3M+ transactions down to fraud-relevant types (`TRANSFER`, `CASH_OUT`), then engineered 6 purely behavioral, **causal** signals: transaction velocity, hour-of-day, sender/receiver graph degree (to capture multi-node fraud rings), and transaction-to-wealth ratio. No raw ledger balances are used directly, avoiding label leakage. Graph-degree features are computed as running/expanding counts (not global counts) so that no row ever sees information from a transaction that happens later in time — see the note in Module 2 of the notebook for details on this fix.
-- **Chronological Splitting** — Trained on the past, tested on the future (80/20 time-based split) to simulate real production conditions rather than a random split that would leak future information.
-- **Modeling** — A soft-voting ensemble of XGBoost and LightGBM, each tuned for the heavy class imbalance in fraud data via `scale_pos_weight`.
-- **Real-Time Inference** — A Redis Streams-based producer/consumer architecture: a simulated banking API streams live transactions, and a fraud engine consumer scores each one through the trained ensemble in real time.
+- **EDA** — Class imbalance, fraud-by-transaction-type breakdown (confirms fraud is confined to `TRANSFER`/`CASH_OUT`), amount distributions, and correlation analysis on raw ledger fields.
+- **Feature Engineering** — 6 purely behavioral, **causal** signals: transaction velocity, hour-of-day, sender/receiver graph degree, and transaction-to-wealth ratio. No raw ledger balances used directly, avoiding label leakage. Graph-degree features are computed as running/expanding counts (not global counts) so no row ever sees information from a transaction that happens later in time.
+- **Chronological Splitting** — Trained on the past, tested on the future (80/20 time-based split), avoiding lookahead bias from a random split.
+- **Modeling** — Soft-voting ensemble of XGBoost and LightGBM, tuned for class imbalance via `scale_pos_weight`, trained single-threaded for full reproducibility.
+- **Interpretability** — Feature importance and SHAP analysis; on this dataset, `amount_to_balance_ratio` drives ~97% of model decisions, with the graph-degree features contributing marginally — a finding worth noting rather than hiding.
+- **Threshold Optimization** — Decision threshold chosen by maximizing F1 on the precision-recall curve, rather than an arbitrary cutoff; that threshold is used directly in evaluation and in the Redis inference engine.
+- **Real-Time Inference** — A Redis Streams producer/consumer architecture, with measured (not estimated) latency benchmarking and a train/test data drift check.
 
 ## Tech Stack
 
@@ -48,3 +55,6 @@ The notebook downloads the PaySim dataset automatically via `kagglehub` — no m
 
 [PaySim1](https://www.kaggle.com/datasets/ealaxi/paysim1) — a synthetic dataset simulating mobile money transactions, generated from real financial transaction logs, with injected fraudulent behavior.
 
+## License
+
+MIT
