@@ -34,8 +34,7 @@ Training is fully deterministic (`n_jobs=1`, `deterministic=True` on LightGBM), 
 
 ```
 fintech-fraud-detection/
-├── notebooks/
-│   └── fraud_detection.ipynb   # Full pipeline: EDA → features → training → real-time engine
+|── fraud_detection.ipynb   # Full pipeline: EDA → features → training → real-time engine
 ├── requirements.txt
 └── README.md
 ```
