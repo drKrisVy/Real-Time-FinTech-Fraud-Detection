@@ -54,7 +54,3 @@ The notebook downloads the PaySim dataset automatically via `kagglehub` — no m
 ## Dataset
 
 [PaySim1](https://www.kaggle.com/datasets/ealaxi/paysim1) — a synthetic dataset simulating mobile money transactions, generated from real financial transaction logs, with injected fraudulent behavior.
-
-## License
-
-MIT
